@@ -5,7 +5,9 @@ class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Departments
         fields = ('DepartmentId',
-                  'DepartmentName')
+                  'DepartmentName',
+                  'DepartmentDetails',
+                  'DepartmentMembers')
         
 class EmployeeSerializer(serializers.ModelSerializer):
     class Meta:

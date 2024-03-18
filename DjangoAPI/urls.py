@@ -22,5 +22,7 @@ from django.urls import re_path
 
 urlpatterns = [
     re_path('admin/', admin.site.urls),
+    re_path('api/', include('user_api.urls')),
+    # re_path('api-auth/', include('rest_framework.urls')),
     re_path(r'^', include('EmployeeApp.urls'))
 ]

@@ -13,16 +13,27 @@ from django.core.files.storage import default_storage
 @csrf_exempt
 def departmentApi(request,id=0):
     if request.method=='GET':
-        departments = Departments.objects.all()
-        departments_serializer = DepartmentSerializer(departments, many=True)
-        return JsonResponse(departments_serializer.data, safe=False)
+        if id != 0:
+            try:
+                department = Departments.objects.get(DepartmentId=id)
+                department_serializer = DepartmentSerializer(department)
+                specific_department = department_serializer.data
+                return JsonResponse({'data': specific_department, 'message': 'Fetched Successfully!!', 'statusCode': 200}, safe=False)
+            except Departments.DoesNotExist:
+                return JsonResponse({'error': 'Department not found'}, status=404)
+        else:
+            departments = Departments.objects.all()
+            departments_serializer = DepartmentSerializer(departments, many=True)
+            return JsonResponse(departments_serializer.data, safe=False)
     elif request.method=='POST':
         department_data = JSONParser().parse(request)
         department_serializer = DepartmentSerializer(data=department_data)
+        print(department_serializer, 'department_serializer')
         if department_serializer.is_valid():
             department_serializer.save()
-            return JsonResponse("Added Successfully!!", safe=False)
-        return JsonResponse("Failed to Add.", safe=False)
+            new_department_data = department_serializer.data
+            return JsonResponse({'data': new_department_data, 'message': 'Added Successfully!!', 'statusCode': 201}, status=201)  # Return serialized data with status code 201 (Created)
+        return JsonResponse(department_serializer.errors, status=400)
     elif request.method=='PUT':
         department_data = JSONParser().parse(request)
         department = Departments.objects.get(DepartmentId=department_data['DepartmentId'])
@@ -33,8 +44,9 @@ def departmentApi(request,id=0):
         return JsonResponse("Failed to Update,", safe=False)
     elif request.method=='DELETE':
         department = Departments.objects.get(DepartmentId=id)
+        deleted_department_id = department.DepartmentId
         department.delete()
-        return JsonResponse("Deleted Successfully!!", safe=False)
+        return JsonResponse({'message': 'Deleted Successfully!!', 'DepartmentId': str(deleted_department_id), 'statusCode': 200}, status=200)
     
 
 # Add API method for Employees
